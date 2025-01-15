@@ -8,21 +8,40 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { MoralisService } from '@/services/moralis';
+import { useToast } from "@/hooks/use-toast";
+
+const DEMO_WALLET = "DemoWalletAddressHere"; // Replace with actual demo wallet
+const NETWORK = "mainnet";
 
 const TransactionsList = () => {
+  const { toast } = useToast();
+
   const { data: transactions, isLoading } = useQuery({
     queryKey: ['recent-transactions'],
     queryFn: async () => {
-      // This would be replaced with actual Moralis API calls
-      return [
-        { hash: '0x1234...5678', type: 'Transfer', amount: '100 SOL', time: '2 mins ago' },
-        { hash: '0x8765...4321', type: 'Swap', amount: '50 SOL', time: '5 mins ago' },
-      ];
+      try {
+        const swaps = await MoralisService.getSwapsByWallet(NETWORK, DEMO_WALLET);
+        return swaps.map((swap: any) => ({
+          hash: swap.signature,
+          type: 'Swap',
+          amount: `${swap.amount_in} ${swap.token_in_symbol} → ${swap.amount_out} ${swap.token_out_symbol}`,
+          time: new Date(swap.block_timestamp).toLocaleString()
+        }));
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+        toast({
+          title: "Error fetching transactions",
+          description: "Please ensure your Moralis API key is set correctly",
+          variant: "destructive"
+        });
+        return [];
+      }
     }
   });
 
   if (isLoading) {
-    return <div>Loading transactions...</div>;
+    return <div className="text-center py-4">Loading transactions...</div>;
   }
 
   return (
@@ -36,9 +55,9 @@ const TransactionsList = () => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {transactions?.map((tx, index) => (
+        {transactions?.map((tx: any, index: number) => (
           <TableRow key={index}>
-            <TableCell className="font-mono">{tx.hash}</TableCell>
+            <TableCell className="font-mono">{tx.hash.substring(0, 8)}...{tx.hash.substring(-8)}</TableCell>
             <TableCell>{tx.type}</TableCell>
             <TableCell>{tx.amount}</TableCell>
             <TableCell>{tx.time}</TableCell>
