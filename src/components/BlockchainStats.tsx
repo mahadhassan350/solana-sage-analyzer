@@ -5,7 +5,7 @@ import { BarChart, Activity, DollarSign, Clock } from 'lucide-react';
 import { MoralisService } from '@/services/moralis';
 import { useToast } from "@/hooks/use-toast";
 
-const DEMO_WALLET = "DemoWalletAddressHere"; // Replace with actual demo wallet
+const DEMO_WALLET = "97RDdBRsJYW34DVhYotyEyT6J5j4oYWdNScSqUJxmcjG";
 const NETWORK = "mainnet";
 
 const BlockchainStats = () => {
